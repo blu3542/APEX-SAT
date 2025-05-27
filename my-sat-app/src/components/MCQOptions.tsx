@@ -1,18 +1,18 @@
 import React from "react";
 
-export interface AnswerOption {
+export interface MCQOptions {
   id: string;
   text: string;
   isCorrect?: boolean;
 }
 
-interface AnswerOptionsProps {
-  options: AnswerOption[];
+interface MCQOptionsProps {
+  options?: MCQOptions[];
   selectedOption: string | null;
   onSelectOption: (id: string) => void;
 }
 
-const AnswerOptions: React.FC<AnswerOptionsProps> = ({
+const AnswerOptions: React.FC<MCQOptionsProps> = ({
   options,
   selectedOption,
   onSelectOption,

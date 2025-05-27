@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
 import QuestionHeader from "./QuestionHeader";
 import QuestionContent from "./QuestionContent";
-import AnswerOptions from "./AnswerOptions";
+import MCQOptions from "./MCQOptions";
 import { Question } from "../types/question_ds";
+import FillBlank from "./FillBlank";
 
 interface DigitalSATQuestionProps {
   question: Question;
@@ -42,15 +43,21 @@ const DigitialSATQuestion: React.FC<DigitalSATQuestionProps> = ({
         />
 
         <QuestionContent
-          questionText={question.questionText}
-          instructionText={question.instructionText}
+          questionText={question.question_text}
+          instructionText={question.instruction_text}
         />
 
-        <AnswerOptions
-          options={question.options}
-          selectedOption={selectedOption}
-          onSelectOption={handleSelectOption}
-        />
+        <div>
+          {question.type == "mcq" ? (
+            <MCQOptions
+              options={question.options}
+              selectedOption={selectedOption}
+              onSelectOption={handleSelectOption}
+            />
+          ) : (
+            <FillBlank answer={question.correct_answer}></FillBlank>
+          )}
+        </div>
       </main>
     </div>
   );

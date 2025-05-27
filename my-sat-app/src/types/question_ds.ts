@@ -1,14 +1,16 @@
 export interface Option {
     id: string;
     text: string;
-    isCorrect: boolean;
+    is_correct: boolean;
   }
   
   export interface Question {
     id: number;
-    questionText: string;
-    instructionText: string;
-    options: Option[];
+    question_text: string;
+    instruction_text: string;
+    options?: Option[];
+    type: 'mcq' | 'fill-in';
+    correct_answer?: number;
   }
   
   export interface QuestionSet {
