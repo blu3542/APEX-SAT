@@ -1,39 +1,95 @@
+import { useEffect, useState } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import HomePage from "./pages/HomePage";
 import DigitalSATQuestion from "./components/DigitalSATQuestion";
-import { useState } from "react";
-import {createClient} from '@supabase/supabase-js';
-
-//creating a supabase client to fetch from
-const supabase = createClient(import.meta.env.VITE_PUBLIC_SUPABASE_URL, import.meta.env.VITE_PUBLIC_SUPABASE_ANON_KEY);
-
-//fetch data
-let {data: Question, error} = await supabase.from('Question').select('*').limit(1).single();
-
-//print fetched JSON for debugging
-if (error) {
-  console.error('Error fetching question:', error);
-} else {
-  console.log('Sample question:', Question);
-}
-
-
-
-
-
+import { Auth } from "@supabase/auth-ui-react";
+import { ThemeSupa } from "@supabase/auth-ui-shared";
+import CreateProfile from "./pages/CreateProfile";
+import { supabase } from "./components/supabase";
 
 function App() {
-  const [count, setCount] = useState(0);
+  const [session, setSession] = useState(null);
+  const [Question, setQuestion] = useState(null);  // note capital Q to match your destructuring
+  const [loadingQuestion, setLoadingQuestion] = useState(false);
 
+  // — auth setup
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  // — only once we have a session, fetch the question
+  useEffect(() => {
+    if (!session) return;
+
+    setLoadingQuestion(true);
+    supabase
+      .from("Question")
+      .select("*")
+      .limit(1)
+      .single()
+      .then(({ data: Question, error }) => {
+        if (error) {
+          console.error("Error fetching question:", error);
+        } else {
+          console.log("Sample question:", Question);
+          setQuestion(Question);
+        }
+      })
+      .finally(() => {
+        setLoadingQuestion(false);
+      });
+  }, [session]);
+
+  // — if not signed in, show Auth
+  if (!session) {
+    return (
+      <div className="flex justify-center items-center w-screen h-screen">
+        <div className="w-full max-w-md">
+          <img
+            src="/apex_logo.jpeg"
+            className="mx-auto mb-6 w-32 h-32"
+            alt="Apex Logo"
+          />
+          <Auth
+            supabaseClient={supabase}
+            appearance={{ theme: ThemeSupa }}
+            providers={["google"]}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  // — signed in: show routes
   return (
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<HomePage />} />
-        <Route path="/questions" element={
-          <div className = "flex items-center justify-center">
-            <DigitalSATQuestion question={Question}/>
-          </div>
-          } />
+        <Route path="/profile" element={<CreateProfile />} />
+        <Route
+          path="/questions"
+          element={
+            <div className="flex items-center justify-center w-full h-full">
+              {loadingQuestion ? (
+                <div>Loading question…</div>
+              ) : Question ? (
+                <DigitalSATQuestion question={Question} />
+              ) : (
+                <div>No question found.</div>
+              )}
+            </div>
+          }
+        />
       </Routes>
     </BrowserRouter>
   );

@@ -8,8 +8,11 @@ const HomePage = () => {
     <div>
         
         <h1 className = "text-blue-400">Welcome to the SAT App</h1>
-        <div className = "text-blue-300">Test</div>
+        <Link to="">Signup / Login</Link>
+        <div/>
         <Link to="/questions">Practice Questions</Link>
+        <div/>
+        <Link to="/profile">Create Profile</Link>
     </div>
   )
 }
