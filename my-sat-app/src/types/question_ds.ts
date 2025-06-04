@@ -18,4 +18,5 @@ export interface Option {
     title: string;
     questions: Question[];
     timeLimit: number; // in minutes
+
   }

@@ -13,7 +13,7 @@ interface DigitalSATQuestionProps {
   onMarkForReview?: (questionId: number, isMarked: boolean) => void;
 }
 
-const DigitialSATQuestion: React.FC<DigitalSATQuestionProps> = ({
+const DigitalSATQuestion: React.FC<DigitalSATQuestionProps> = ({
   question,
   onAnswerSubmit,
   onMarkForReview,
@@ -63,4 +63,4 @@ const DigitialSATQuestion: React.FC<DigitalSATQuestionProps> = ({
   );
 };
 
-export default DigitialSATQuestion;
+export default DigitalSATQuestion;

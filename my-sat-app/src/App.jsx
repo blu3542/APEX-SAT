@@ -6,7 +6,8 @@ import { Auth } from "@supabase/auth-ui-react";
 import { ThemeSupa } from "@supabase/auth-ui-shared";
 import CreateProfile from "./pages/CreateProfile";
 import { supabase } from "./components/supabase";
-
+import QuizDashboard from "./pages/QuizDashboard.jsx";
+import TestPage from "./pages/testPage.js";
 function App() {
   const [session, setSession] = useState(null);
   const [Question, setQuestion] = useState(null);  // note capital Q to match your destructuring
@@ -72,26 +73,29 @@ function App() {
 
   // — signed in: show routes
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/profile" element={<CreateProfile />} />
-        <Route
-          path="/questions"
-          element={
-            <div className="flex items-center justify-center w-full h-full">
-              {loadingQuestion ? (
-                <div>Loading question…</div>
-              ) : Question ? (
-                <DigitalSATQuestion question={Question} />
-              ) : (
-                <div>No question found.</div>
-              )}
-            </div>
-          }
-        />
-      </Routes>
+    <div className="flex flex-col min-h-screen w-full">
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/tests" element={<QuizDashboard/>}/>
+          <Route path="/profile" element={<CreateProfile />} />
+          <Route
+            path="/questions"
+            element={
+              <div className="flex items-center justify-center w-full h-full">
+                {loadingQuestion ? (
+                  <div>Loading question…</div>
+                ) : Question ? (
+                  <DigitalSATQuestion question={Question} />
+                ) : (
+                  <div>No question found.</div>
+                )}
+              </div>
+            }
+          />
+        </Routes>
     </BrowserRouter>
+    </div>
   );
 }
 
