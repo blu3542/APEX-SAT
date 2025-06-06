@@ -1,18 +1,13 @@
 import React from "react";
 
 interface QuestionContentProps {
-  questionText: string;
-  instructionText: string;
+  text: string;
 }
 
-const QuestionContent: React.FC<QuestionContentProps> = ({
-  questionText,
-  instructionText,
-}) => {
+const QuestionContent: React.FC<QuestionContentProps> = ({ text }) => {
   return (
     <div className="mb-8">
-      <p className="text-lg leading-relaxed mb-6">{questionText}</p>
-      <p className="text-lg font-medium mb-6">{instructionText}</p>
+      <p className="text-lg font-medium mb-6">{text}</p>
     </div>
   );
 };

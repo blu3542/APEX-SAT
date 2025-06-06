@@ -1,3 +1,4 @@
+// src/pages/CreateProfile.jsx
 import React, { useState } from "react";
 import { supabase } from "../components/supabase";
 
@@ -16,22 +17,20 @@ const CreateProfile = () => {
 
     const {
       data: { session },
-      error: sessionError
+      error: sessionError,
     } = await supabase.auth.getSession();
     if (sessionError) throw sessionError;
     const user = session.user;
 
     try {
-      const { error: supabaseError } = await supabase
-        .from("profiles")
-        .insert([
-          {
-            id: user.id,
-            display_name: `${firstName} ${lastName}`,
-            position,
-            email: user.email
-          },
-        ]);
+      const { error: supabaseError } = await supabase.from("profiles").insert([
+        {
+          id: user.id,
+          display_name: `${firstName} ${lastName}`,
+          position,
+          email: user.email,
+        },
+      ]);
 
       if (supabaseError) throw supabaseError;
 
@@ -48,76 +47,91 @@ const CreateProfile = () => {
   };
 
   return (
-      <div className="min-h-screen w-screen bg-gray-50 flex items-center justify-center">
-        <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-xl shadow-lg">
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Create Your Profile
-          </h2>
-          <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-            <div className="rounded-md shadow-sm space-y-4">
-              {/* First Name */}
-              <div>
-                <label htmlFor="firstName" className="block text-sm font-medium text-gray-700">
-                  First Name
-                </label>
-                <input
-                  id="firstName"
-                  name="firstName"
-                  type="text"
-                  required
-                  value={firstName}
-                  onChange={(e) => setFirstName(e.target.value)}
-                  placeholder="John"
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm"
-                />
-              </div>
-              {/* Last Name */}
-              <div>
-                <label htmlFor="lastName" className="block text-sm font-medium text-gray-700">
-                  Last Name
-                </label>
-                <input
-                  id="lastName"
-                  name="lastName"
-                  type="text"
-                  required
-                  value={lastName}
-                  onChange={(e) => setLastName(e.target.value)}
-                  placeholder="Doe"
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm"
-                />
-              </div>
-              {/* Position */}
-              <div>
-                <label htmlFor="position" className="block text-sm font-medium text-gray-700">
-                  Position
-                </label>
-                <select
-                  id="position"
-                  name="position"
-                  value={position}
-                  onChange={(e) => setPosition(e.target.value)}
-                  className="mt-1 block w-full pl-3 pr-10 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm"
-                >
-                  <option value="student">Student</option>
-                  <option value="tutor">Tutor</option>
-                </select>
-              </div>
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 flex items-center justify-center p-6">
+      <div className="max-w-md w-full bg-white rounded-xl shadow-lg p-8">
+        <h2 className="text-center text-3xl font-extrabold text-blue-900 mb-6">
+          Create Your Profile
+        </h2>
+        <form className="space-y-6" onSubmit={handleSubmit}>
+          <div className="space-y-4">
+            {/* First Name */}
+            <div>
+              <label
+                htmlFor="firstName"
+                className="block text-sm font-medium text-gray-700"
+              >
+                First Name
+              </label>
+              <input
+                id="firstName"
+                name="firstName"
+                type="text"
+                required
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+                placeholder="John"
+                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-600 focus:border-blue-600 sm:text-sm"
+              />
             </div>
+            {/* Last Name */}
+            <div>
+              <label
+                htmlFor="lastName"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Last Name
+              </label>
+              <input
+                id="lastName"
+                name="lastName"
+                type="text"
+                required
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+                placeholder="Doe"
+                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-600 focus:border-blue-600 sm:text-sm"
+              />
+            </div>
+            {/* Position */}
+            <div>
+              <label
+                htmlFor="position"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Position
+              </label>
+              <select
+                id="position"
+                name="position"
+                value={position}
+                onChange={(e) => setPosition(e.target.value)}
+                className="mt-1 block w-full pl-3 pr-10 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-600 focus:border-blue-600 sm:text-sm"
+              >
+                <option value="student">Student</option>
+                <option value="tutor">Tutor</option>
+              </select>
+            </div>
+          </div>
 
-            {error && <div className="text-red-600 text-sm text-center">{error}</div>}
-            {success && <div className="text-green-600 text-sm text-center">Profile created successfully!</div>}
+          {error && (
+            <div className="text-red-600 text-sm text-center">{error}</div>
+          )}
+          {success && (
+            <div className="text-green-600 text-sm text-center">
+              Profile created successfully!
+            </div>
+          )}
 
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="bg-green-600 text-white py-2 px-4 rounded block mx-auto"
-            >
-              {isSubmitting ? "Creating Profile..." : "Create Profile"}
-            </button>
-          </form>
-        </div>
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="w-full bg-emerald-500 hover:bg-emerald-700 text-white py-2 px-4 rounded-lg font-semibold transition disabled:bg-gray-300"
+          >
+            {isSubmitting ? "Creating Profile..." : "Create Profile"}
+          </button>
+        </form>
       </div>
+    </div>
   );
 };
 

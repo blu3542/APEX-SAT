@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import HomePage from "./pages/HomePage";
+import HomePage from "./pages/HomePage.tsx";
 import DigitalSATQuestion from "./components/DigitalSATQuestion";
 import { Auth } from "@supabase/auth-ui-react";
 import { ThemeSupa } from "@supabase/auth-ui-shared";
@@ -8,6 +8,11 @@ import CreateProfile from "./pages/CreateProfile";
 import { supabase } from "./components/supabase";
 import QuizDashboard from "./pages/QuizDashboard.jsx";
 import TestPage from "./pages/testPage.js";
+import { NavBar } from "./components/NavBar.js";
+import { Button } from "./components/Button.js";
+import { Layout } from "./components/Layout.js";
+
+
 function App() {
   const [session, setSession] = useState(null);
   const [Question, setQuestion] = useState(null);  // note capital Q to match your destructuring
@@ -31,6 +36,7 @@ function App() {
   // — only once we have a session, fetch the question
   useEffect(() => {
     if (!session) return;
+    // console.log("authorized");
 
     setLoadingQuestion(true);
     supabase
@@ -42,7 +48,7 @@ function App() {
         if (error) {
           console.error("Error fetching question:", error);
         } else {
-          console.log("Sample question:", Question);
+          // console.log("Sample question:", Question);
           setQuestion(Question);
         }
       })
@@ -64,7 +70,8 @@ function App() {
           <Auth
             supabaseClient={supabase}
             appearance={{ theme: ThemeSupa }}
-            providers={["google"]}
+            // will configure google auth provider later
+            providers={[]}
           />
         </div>
       </div>
@@ -75,6 +82,8 @@ function App() {
   return (
     <div className="flex flex-col min-h-screen w-full">
       <BrowserRouter>
+      <NavBar/>
+      <Layout>
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/tests" element={<QuizDashboard/>}/>
@@ -94,6 +103,7 @@ function App() {
             }
           />
         </Routes>
+       </Layout>
     </BrowserRouter>
     </div>
   );

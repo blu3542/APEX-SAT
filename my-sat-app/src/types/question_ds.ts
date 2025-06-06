@@ -6,10 +6,10 @@ export interface Option {
   
   export interface Question {
     id: number;
-    question_text: string;
-    instruction_text: string;
-    options?: Option[];
+    text: string;
+    Options?: Option[];
     type: 'mcq' | 'fill-in';
+    //correct_answer only exists for fill blank questions
     correct_answer?: number;
   }
   

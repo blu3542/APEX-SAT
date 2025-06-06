@@ -42,20 +42,20 @@ const DigitalSATQuestion: React.FC<DigitalSATQuestionProps> = ({
           onToggleMarkForReview={handleToggleMarkForReview}
         />
 
-        <QuestionContent
-          questionText={question.question_text}
-          instructionText={question.instruction_text}
-        />
+        <QuestionContent text={question.text} />
 
         <div>
           {question.type == "mcq" ? (
             <MCQOptions
-              options={question.options}
+              options={question.Options}
               selectedOption={selectedOption}
               onSelectOption={handleSelectOption}
             />
           ) : (
-            <FillBlank answer={question.correct_answer}></FillBlank>
+            <FillBlank
+              questionId={question.id}
+              onAnswerSubmit={(qId, ans) => onAnswerSubmit?.(qId, ans)}
+            />
           )}
         </div>
       </main>

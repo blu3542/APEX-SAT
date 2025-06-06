@@ -1,6 +1,7 @@
 import React, { useEffect, useState} from 'react';
 import { supabase } from '../components/supabase';
 import TestPage from './testPage';
+import {Button} from "../components/Button";
 
 //query the number of practice tests in QuestionSets in Supabase - Run Once at mount
 const QuizDashboard = () => {
@@ -17,8 +18,31 @@ const QuizDashboard = () => {
     const queryQuestions = async (setID, testType, minutes) => {
         let questionList = []
         
-            const {data, error} = await supabase.from("Question").select("*").eq("question_set_id", setID);
+            if (testType == "Reading and Writing"){
+              setID += 1; 
+            }
+            const { data, error } = await supabase
+              .from("Question")
+              .select(`
+                id,
+                question_set_id,
+                text,
+                type,
+                correct_answer,
+                Options (
+                  id,
+                  text,
+                  is_correct
+                )
+              `)
+              .eq("question_set_id", setID).order("id");
 
+              // console.log("Results of question data query: ", data);
+
+            
+
+  
+            
             if (error){
                 console.log(error);
             }
@@ -62,9 +86,9 @@ const QuizDashboard = () => {
             }
 
             if(data){
-                console.log(data);
+                // console.log(data);
                 let number = Math.floor(data.length / 2);
-                console.log("Number of Tests: ", number);
+                // console.log("Number of Tests: ", number);
                 setNumTests(number);
             }
         }
@@ -87,9 +111,8 @@ const QuizDashboard = () => {
                 <h2 className="text-2xl font-semibold">Your Tests</h2>
 
                 {/* Digital Sample SAT in progress section */}
-                <div className="bg-teal-600 text-white px-4 py-3 rounded flex justify-between items-center">
-                  <span className="text-lg font-medium">Digital SAT</span>
-                  <span className="italic text-gray-200">in progress</span>
+                <div className="bg-blue-800 text-white px-4 py-3 rounded flex justify-between items-center">
+                  <span className="text-lg font-medium">Digital SAT Exams</span>
                 </div>
 
                 
@@ -112,22 +135,29 @@ const TestModule = ({ testNumber, onStartClick }) => (
       {/* Reading Section */}
       <div className="flex items-center justify-between p-4 border-b border-gray-200">
         <div className="flex items-center space-x-4">
-          <div className="w-10 h-10 rounded-full border-2 border-teal-600 flex items-center justify-center text-teal-600 font-bold">‖</div>
           <span className="font-medium text-gray-800">Reading and Writing</span>
         </div>
         <div className="flex space-x-6 text-teal-600">
-          <button className="flex items-center space-x-1 hover:underline" onClick={() => onStartClick(testNumber, "Reading and Writing", 35)}><span>→</span><span>Start</span></button>
-          <button className="flex items-center space-x-1 hover:underline"><span>🗑</span><span>Reset</span></button>
+          <Button onClick={() => onStartClick(testNumber, "Reading and Writing", 35)}>
+            <div className="flex items-center space-x-1">
+              <span>→</span>
+              <span>Start</span>
+            </div>
+          </Button>
         </div>
       </div>
   
       {/* Math Section */}
       <div className="flex items-center justify-between p-4">
         <div className="flex items-center space-x-4">
-          <div className="w-10 h-10 rounded-full border-2 border-teal-600 flex items-center justify-center text-teal-600 font-bold text-sm">32<br />min</div>
           <span className="font-medium text-gray-800">Math</span>
         </div>
-        <button className="flex items-center space-x-1 text-teal-600 hover:underline" onClick={() => onStartClick(testNumber, "Math", 32)}><span>→</span><span>Start</span></button>
+          <Button onClick={() => onStartClick(testNumber, "Math", 32)}>
+            <div className="flex items-center space-x-1">
+              <span>→</span>
+              <span>Start</span>
+            </div>
+          </Button>
       </div>
     </div>
   );

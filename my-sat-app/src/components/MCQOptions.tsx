@@ -13,7 +13,7 @@ interface MCQOptionsProps {
 }
 
 const AnswerOptions: React.FC<MCQOptionsProps> = ({
-  options,
+  options = [],
   selectedOption,
   onSelectOption,
 }) => {
