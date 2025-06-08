@@ -42,7 +42,7 @@ const DigitalSATQuestion: React.FC<DigitalSATQuestionProps> = ({
           onToggleMarkForReview={handleToggleMarkForReview}
         />
 
-        <QuestionContent text={question.text} />
+        <QuestionContent text={question.text} image={question.image_url} />
 
         <div>
           {question.type == "mcq" ? (

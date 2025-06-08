@@ -15,10 +15,10 @@ const QuizDashboard = () => {
 
     //function for querying the correct questionSet when start is clicked
     //we need a QuestionSet variable to send to testPage component
-    const queryQuestions = async (setID, testType, minutes) => {
+    const queryQuestions = async (test_number, question_set_type, minutes) => {
         let questionList = []
         
-            if (testType == "Reading and Writing"){
+            if (question_set_type == "Math"){
               setID += 1; 
             }
             const { data, error } = await supabase
@@ -32,7 +32,8 @@ const QuizDashboard = () => {
                 Options (
                   id,
                   text,
-                  is_correct
+                  is_correct,
+                  letter
                 )
               `)
               .eq("question_set_id", setID).order("id");
@@ -60,13 +61,85 @@ const QuizDashboard = () => {
         return questionSet;
     }
 
-    //event handler for when start button is clicked
-    const handleStartClick = async (testNumber, testType, minutes) => {
-        const questionSet = await queryQuestions(testNumber, testType, minutes); 
-        if (questionSet) {
-            setSelectedQuestionSet(questionSet);
+
+
+    // Helper to load all modules for a given test and section
+    async function loadSubjectModules(testNumber, section) {
+      const prefix = section === "Reading and Writing" ? "R" : "M";
+      const { data, error } = await supabase
+        .from("QuestionSet")
+        .select("id,title,time_limit,difficulty")
+        .eq("test_id", testNumber)
+        .like("title", `${prefix}_Module_%`)
+        .order("id", { ascending: true });
+
+      if (error) {
+        console.error("Error loading modules:", error);
+        return [];
+      }
+      if (!data) return [];
+
+      // Parse title (e.g. "R_Module_1_Medium")
+      return data.map(row => {
+        const [, , num, diff] = row.title.split("_");
+        return {
+          id: row.id,
+          moduleNumber: parseInt(num, 10),            // 1 or 2
+          difficulty: diff.toLowerCase(),              // "easy", "medium", or "hard"
+          timeLimit: row.time_limit
+        };
+      });
+    }
+
+    // Event handler to start the correct module (Module 1 – Medium by default)
+    const handleStartClick = async (testNumber, section) => {
+      try {
+        // 1) Load all modules for that section
+        const modules = await loadSubjectModules(testNumber, section);
+
+        // 2) Pick Module 1 – Medium
+        const firstMod = modules.find(
+          m => m.moduleNumber === 1 && m.difficulty === "medium"
+        );
+        if (!firstMod) {
+          console.error("Module 1 Medium not found for", section);
+          return;
         }
+
+        // 3) Fetch questions + nested Options
+        const { data: questions, error: qError } = await supabase
+          .from("Question")
+          .select(`
+            id,
+            question_set_id,
+            text,
+            type,
+            correct_answer,
+            image_url,
+            Options (
+              id,
+              text,
+              is_correct,
+              letter
+            )
+          `)
+          .eq("question_set_id", firstMod.id)
+          .order("id", { ascending: true });
+
+        if (qError) throw qError;
+
+        // 4) Populate state for TestPage
+        setSelectedQuestionSet({
+          id: firstMod.id,
+          title: `${section} Module 1 Medium`,
+          timeLimit: firstMod.timeLimit,
+          questions: questions || []
+        });
+      } catch (err) {
+        console.error("Error starting module:", err);
+      }
     };
+
 
     
 
@@ -76,25 +149,26 @@ const QuizDashboard = () => {
     const [numTests, setNumTests] = useState(0);
 
     useEffect(() => {
+      const fetchData = async () => {
+      const { data, error } = await supabase
+        .from("QuestionSet")
+        .select("test_id", { count: "exact", head: false }) // this gets all test_id rows with count
 
-        const fetchData = async () =>{
+      if (error) {
+        console.log(error);
+      }
 
-            const {data, error} = await supabase.from("QuestionSet").select();
+      if (data) {
+        const uniqueTestIds = new Set(data.map(row => row.test_id));
+        setNumTests(uniqueTestIds.size);
+        console.log("number of tests: ",uniqueTestIds.size);
+      }
+      
+    };
 
-            if (error){
-                console.log(error);
-            }
+    fetchData();
+    }, []);
 
-            if(data){
-                // console.log(data);
-                let number = Math.floor(data.length / 2);
-                // console.log("Number of Tests: ", number);
-                setNumTests(number);
-            }
-        }
-
-        fetchData();
-      }, []);
 
     //generate the test copmonents for each test that we will render. Note: Happens before return statement as return should be HTML only, no JS logic
       let testComponents = [];

@@ -1,13 +1,8 @@
 import React from "react";
-
-export interface MCQOptions {
-  id: string;
-  text: string;
-  isCorrect?: boolean;
-}
+import { Option } from "../types/question_ds";
 
 interface MCQOptionsProps {
-  options?: MCQOptions[];
+  options?: Option[];
   selectedOption: string | null;
   onSelectOption: (id: string) => void;
 }
@@ -25,7 +20,7 @@ const AnswerOptions: React.FC<MCQOptionsProps> = ({
           className={`
             flex items-center border border-gray-300 rounded-md p-4 cursor-pointer
             ${
-              selectedOption === option.id && option.isCorrect
+              selectedOption === option.id && option.is_correct
                 ? "border-green-500"
                 : ""
             }
@@ -33,7 +28,7 @@ const AnswerOptions: React.FC<MCQOptionsProps> = ({
           onClick={() => onSelectOption(option.id)}
         >
           <div className="w-8 h-8 flex items-center justify-center rounded-full border border-gray-400 mr-4">
-            {selectedOption === option.id && option.isCorrect ? (
+            {selectedOption === option.id && option.is_correct ? (
               <div className="bg-green-500 rounded-full p-1">
                 <svg
                   className="h-6 w-6 text-white"
@@ -50,7 +45,7 @@ const AnswerOptions: React.FC<MCQOptionsProps> = ({
                 </svg>
               </div>
             ) : (
-              <span className="text-gray-600">{option.id}</span>
+              <span className="text-gray-600">{option.letter}</span>
             )}
           </div>
           <span className="text-lg">{option.text}</span>

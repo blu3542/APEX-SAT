@@ -2,6 +2,7 @@ export interface Option {
     id: string;
     text: string;
     is_correct: boolean;
+    letter: 'a' | 'b' | 'c' | 'd'
   }
   
   export interface Question {
@@ -11,6 +12,7 @@ export interface Option {
     type: 'mcq' | 'fill-in';
     //correct_answer only exists for fill blank questions
     correct_answer?: number;
+    image_url: string | null;
   }
   
   export interface QuestionSet {
