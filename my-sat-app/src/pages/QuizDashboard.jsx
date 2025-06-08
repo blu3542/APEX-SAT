@@ -11,58 +11,9 @@ const QuizDashboard = () => {
     //logic for routing to a question set
 
     //questionSet in state
-    const[selectedQuestionSet, setSelectedQuestionSet] = useState(null);
+    const[selectedAdaptiveQuestionSet, setSelectedAdaptiveQuestionSet] = useState(null);
 
-    //function for querying the correct questionSet when start is clicked
-    //we need a QuestionSet variable to send to testPage component
-    const queryQuestions = async (test_number, question_set_type, minutes) => {
-        let questionList = []
-        
-            if (question_set_type == "Math"){
-              setID += 1; 
-            }
-            const { data, error } = await supabase
-              .from("Question")
-              .select(`
-                id,
-                question_set_id,
-                text,
-                type,
-                correct_answer,
-                Options (
-                  id,
-                  text,
-                  is_correct,
-                  letter
-                )
-              `)
-              .eq("question_set_id", setID).order("id");
-
-              // console.log("Results of question data query: ", data);
-
-            
-
-  
-            
-            if (error){
-                console.log(error);
-            }
-            if (data){
-                questionList = data;
-            }
-            
-        const questionSet = {
-            id: setID,
-            title: `${testType}  ${setID}`,
-            questions: questionList,
-            timeLimit: minutes
-        };
-
-        return questionSet;
-    }
-
-
-
+    
     // Helper to load all modules for a given test and section
     async function loadSubjectModules(testNumber, section) {
       const prefix = section === "Reading and Writing" ? "R" : "M";
@@ -92,7 +43,7 @@ const QuizDashboard = () => {
     }
 
     // Event handler to start the correct module (Module 1 – Medium by default)
-    const handleStartClick = async (testNumber, section) => {
+    const handleStartClick = async (testNumber, section, minutes) => {
       try {
         // 1) Load all modules for that section
         const modules = await loadSubjectModules(testNumber, section);
@@ -129,11 +80,15 @@ const QuizDashboard = () => {
         if (qError) throw qError;
 
         // 4) Populate state for TestPage
-        setSelectedQuestionSet({
+        setSelectedAdaptiveQuestionSet({
           id: firstMod.id,
           title: `${section} Module 1 Medium`,
           timeLimit: firstMod.timeLimit,
-          questions: questions || []
+          questions: questions || [],
+          testNumber,
+          section,
+          moduleNumber: 1,
+          difficulty: "medium"
         });
       } catch (err) {
         console.error("Error starting module:", err);
@@ -177,8 +132,8 @@ const QuizDashboard = () => {
       };
     
   return (
-    selectedQuestionSet
-            ? <TestPage questions={selectedQuestionSet}/>
+    selectedAdaptiveQuestionSet
+            ? <TestPage questions={selectedAdaptiveQuestionSet}/>
             :(
               <div className="min-h-screen w-full font-sans p-5 space-y-6">
                 {/* Your Tests Header */}

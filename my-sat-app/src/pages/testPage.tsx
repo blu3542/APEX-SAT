@@ -1,18 +1,29 @@
 import React, { useEffect, useRef, useState } from "react";
-import { QuestionSet } from "../types/question_ds";
+import { AdaptiveQuestionSet } from "../types/question_ds";
 import DigitalSATQuestion from "../components/DigitalSATQuestion";
 import { supabase } from "../components/supabase";
 import { Button } from "../components/Button";
+import { Question } from "../types/question_ds";
 
 interface TestPageProps {
-  questions: QuestionSet;
+  questions: AdaptiveQuestionSet;
 }
 
 const TestPage: React.FC<TestPageProps> = ({ questions }) => {
+  //destructuring the questions prop
+  const {
+    moduleNumber: initialModule,
+    difficulty: initialDifficulty,
+    id: initialSetId,
+    title: initialTitle,
+    timeLimit: initialTimeLimit,
+    questions: initialQuestions,
+    testNumber,
+    section,
+  } = questions;
   const [attemptId, setAttemptId] = useState<number | null>(null);
-  const [id, setId] = useState<number | null>(null);
-  const [title, setTitle] = useState<string>("");
-  const [timeLimit, setTimeLimit] = useState<number | null>(null);
+  const [title, setTitle] = useState<string>(initialTitle);
+  const [timeLimit, setTimeLimit] = useState<number | null>(initialTimeLimit);
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const [isFinished, setIsFinished] = useState<boolean>(false);
   const [score, setScore] = useState<number>(0);
@@ -22,27 +33,22 @@ const TestPage: React.FC<TestPageProps> = ({ questions }) => {
       { selectedOptionId: number | null; textAnswer: string | null }
     >
   >({});
+  const [questionList, setQuestionList] =
+    useState<Question[]>(initialQuestions);
+  const [moduleNum, setModuleNum] = useState(initialModule);
+  const [difficultyState, setDifficulty] = useState(initialDifficulty);
+  const [currentSetId, setcurrentSetId] = useState(initialSetId);
 
   // A ref to remember if we've already inserted for this question set
   const didStartAttemptRef = useRef(false);
 
-  // Initialize question‐set state from props
+  // state setters based on when currentSetId changes
   useEffect(() => {
-    setId(questions.id);
-    setTitle(questions.title);
-    setTimeLimit(questions.timeLimit);
     setCurrentIndex(0);
     // Reset the “did start” flag whenever the question set changes:
-    didStartAttemptRef.current = false;
-  }, [questions]);
-
-  // Only start a new attempt once, even if this effect mounts twice
-  useEffect(() => {
-    if (didStartAttemptRef.current) {
-      // We’ve already run this for the current question set, so bail out
-      return;
-    }
-    didStartAttemptRef.current = true;
+    setIsFinished(false);
+    setScore(0);
+    setUserAnswers({});
 
     const startNewAttempt = async () => {
       const {
@@ -60,7 +66,7 @@ const TestPage: React.FC<TestPageProps> = ({ questions }) => {
         .insert([
           {
             student_id: userId,
-            question_set_id: questions.id,
+            question_set_id: currentSetId,
             started_at: new Date(),
           },
         ])
@@ -75,11 +81,11 @@ const TestPage: React.FC<TestPageProps> = ({ questions }) => {
     };
 
     startNewAttempt();
-  }, [questions]);
+  }, [currentSetId]);
 
-  const currentQuestion = questions.questions[currentIndex];
+  const currentQuestion = questionList[currentIndex];
   const handleNextQuestion = () => {
-    if (currentIndex < questions.questions.length - 1) {
+    if (currentIndex < questionList.length - 1) {
       setCurrentIndex((prev) => prev + 1);
     }
   };
@@ -95,7 +101,7 @@ const TestPage: React.FC<TestPageProps> = ({ questions }) => {
     answer: string | number
   ) => {
     if (!attemptId) return;
-    const question = questions.questions.find((q) => q.id === questionId);
+    const question = questionList.find((q) => q.id === questionId);
     if (!question) return;
 
     let isCorrect = false;
@@ -135,7 +141,7 @@ const TestPage: React.FC<TestPageProps> = ({ questions }) => {
       answered_at: Date;
     }> = [];
 
-    for (const q of questions.questions) {
+    for (const q of questionList) {
       const ua = userAnswers[q.id]; // may be undefined if the user never answered
 
       let isCorrect = false;
@@ -198,9 +204,56 @@ const TestPage: React.FC<TestPageProps> = ({ questions }) => {
       console.error("Error updating attempt:", updateError);
     }
 
-    // 5) Update local UI state
-    setScore(correctCount);
-    setIsFinished(true);
+    //Part 2: Transition Into Next Question Set (adaptive testing)
+    if (moduleNum === 1) {
+      // a) decide next difficulty
+      const threshold = Math.ceil(questionList.length * 0.67);
+      const nextDiff = correctCount >= threshold ? "Hard" : "Easy";
+      const prefix = section === "Reading and Writing" ? "R" : "M";
+
+      // b) fetch Module 2 metadata
+      const { data: mod2Set, error: modErr } = await supabase
+        .from("QuestionSet")
+        .select("id,title,time_limit")
+        .eq("test_id", testNumber)
+        .like("title", `${prefix}_Module_2_${nextDiff}`)
+        .single();
+      if (modErr || !mod2Set?.id) {
+        console.error("Module 2 not found", modErr);
+        setIsFinished(true);
+        return;
+      }
+
+      // c) fetch Module 2 questions
+      const { data: mod2Qs, error: qErr } = await supabase
+        .from("Question")
+        .select(
+          `
+        id,question_set_id,text,type,correct_answer,image_url,
+        Options(id,text,is_correct,letter)
+      `
+        )
+        .eq("question_set_id", mod2Set.id)
+        .order("id");
+      if (qErr || !mod2Qs) {
+        console.error("Failed to load Module 2 questions", qErr);
+        setIsFinished(true);
+        return;
+      }
+
+      // d) swap in Module 2 UI state
+      setModuleNum(2);
+      setDifficulty(nextDiff);
+      setTitle(mod2Set.title);
+      setTimeLimit(mod2Set.time_limit);
+      setQuestionList(mod2Qs);
+      // e) trigger the effect to start Module 2 attempt
+      setcurrentSetId(mod2Set.id);
+    } else {
+      // MODULE 2 complete → show final results
+      setScore(correctCount);
+      setIsFinished(true);
+    }
   };
 
   // If the quiz is finished, show a result message
@@ -209,7 +262,7 @@ const TestPage: React.FC<TestPageProps> = ({ questions }) => {
       <div className="p-6">
         <h2 className="text-2xl font-semibold">Test Complete!</h2>
         <p className="mt-4">
-          You got {score} out of {questions.questions.length} correct.
+          You got {score} out of {questionList.length} correct.
         </p>
         <p className="mt-2 italic text-gray-600">
           Your results have been sent to your tutor.
@@ -246,7 +299,7 @@ const TestPage: React.FC<TestPageProps> = ({ questions }) => {
         <Button
           className="text-white w-[200px]"
           onClick={handleNextQuestion}
-          disabled={currentIndex >= questions.questions.length - 1}
+          disabled={currentIndex >= questionList.length - 1}
         >
           Next Question
         </Button>

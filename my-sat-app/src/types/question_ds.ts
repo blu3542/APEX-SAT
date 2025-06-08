@@ -22,3 +22,10 @@ export interface Option {
     timeLimit: number; // in minutes
 
   }
+
+  export interface AdaptiveQuestionSet extends QuestionSet {
+  testNumber: number;
+  section: "Math" | "Reading and Writing";
+  moduleNumber: number;
+  difficulty: "Easy" | "Medium" | "Hard";
+}
