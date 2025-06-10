@@ -1,8 +1,8 @@
 import React, { useEffect, useRef, useState } from "react";
 import { AdaptiveQuestionSet } from "../types/question_ds";
-import DigitalSATQuestion from "../components/DigitalSATQuestion";
-import { supabase } from "../components/supabase";
-import { Button } from "../components/Button";
+import DigitalSATQuestion from "./DigitalSATQuestion";
+import { supabase } from "./supabase";
+import { Button } from "./Button";
 import { Question } from "../types/question_ds";
 
 interface TestPageProps {
@@ -60,7 +60,8 @@ const TestPage: React.FC<TestPageProps> = ({ questions }) => {
       }
       const userId = session.user.id;
 
-      // console.log("Starting attempt for user:", userId);
+      console.log("Starting test ", testNumber, " for user: ", userId);
+
       const { data, error } = await supabase
         .from("attempts")
         .insert([
@@ -68,6 +69,7 @@ const TestPage: React.FC<TestPageProps> = ({ questions }) => {
             student_id: userId,
             question_set_id: currentSetId,
             started_at: new Date(),
+            test_id: testNumber,
           },
         ])
         .select("id")

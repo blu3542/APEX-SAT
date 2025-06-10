@@ -21,6 +21,9 @@ export const NavBar: React.FC = () => {
         <Link to="/tests" className="hover:underline">
           Practice Tests
         </Link>
+        <Link to="/results" className="hover:underline">
+          Test Results
+        </Link>
         <Link to="/profile" className="hover:underline">
           Profile
         </Link>

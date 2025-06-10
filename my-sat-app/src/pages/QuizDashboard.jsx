@@ -1,10 +1,37 @@
 import React, { useEffect, useState} from 'react';
 import { supabase } from '../components/supabase';
-import TestPage from './testPage';
+import TestPage from '../components/testPage';
 import {Button} from "../components/Button";
+import { useNavigate } from 'react-router-dom';
 
 //query the number of practice tests in QuestionSets in Supabase - Run Once at mount
 const QuizDashboard = () => {
+    const navigate = useNavigate();
+
+    //helper function to check if user has a profile already
+      const checkProfile = async () =>{
+        const{data: {session}, error: sessionError} = await supabase.auth.getSession();
+        if (sessionError){
+          console.error(sessionError);
+          return;
+        }  
+    
+        const user = session?.user;
+        if (!user){
+          return;
+        }
+        
+    
+        //see if a profile exists for the user
+        const {data: profiles, error: fetchError} = await supabase.from("profiles").select("id").eq("id", user.id);
+        if (fetchError){
+          console.error(fetchError);
+        }
+        if (profiles.length == 0){
+          alert("You do not have a profile at Apex SAT")
+          navigate("/profile");
+        }
+      } ;
 
 
 
@@ -104,6 +131,7 @@ const QuizDashboard = () => {
     const [numTests, setNumTests] = useState(0);
 
     useEffect(() => {
+      checkProfile();
       const fetchData = async () => {
       const { data, error } = await supabase
         .from("QuestionSet")
@@ -122,7 +150,7 @@ const QuizDashboard = () => {
     };
 
     fetchData();
-    }, []);
+    }, [navigate]);
 
 
     //generate the test copmonents for each test that we will render. Note: Happens before return statement as return should be HTML only, no JS logic

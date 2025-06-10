@@ -7,10 +7,13 @@ import { ThemeSupa } from "@supabase/auth-ui-shared";
 import CreateProfile from "./pages/CreateProfile";
 import { supabase } from "./components/supabase";
 import QuizDashboard from "./pages/QuizDashboard.jsx";
-import TestPage from "./pages/testPage.js";
+import TestPage from "./components/testPage.js";
 import { NavBar } from "./components/NavBar.js";
 import { Button } from "./components/Button.js";
 import { Layout } from "./components/Layout.js";
+import ResultDashboard from "./pages/ResultDashboard";
+import SolutionPage from "./pages/SolutionPage"
+import ResultPage from "./pages/ResultPage"
 
 
 function App() {
@@ -102,6 +105,9 @@ function App() {
               </div>
             }
           />
+          <Route path="/results" element={<ResultDashboard/>}/>
+          <Route path="/results/:testNumber/session/:sessionIdx/solutions" element={<SolutionPage />}/>
+          <Route path="/results/:testNumber" element={<ResultPage />} />
         </Routes>
        </Layout>
     </BrowserRouter>

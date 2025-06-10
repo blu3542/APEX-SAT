@@ -1,8 +1,11 @@
 // src/pages/CreateProfile.jsx
 import React, { useState } from "react";
 import { supabase } from "../components/supabase";
+import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 
 const CreateProfile = () => {
+  const navigate = useNavigate();
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [position, setPosition] = useState("student");
@@ -10,7 +13,38 @@ const CreateProfile = () => {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
 
+  //helper function to check if user has a profile already
+  const checkProfile = async () =>{
+    const{data: {session}, error: sessionError} = await supabase.auth.getSession();
+    if (sessionError){
+      console.error(sessionError);
+      return;
+    }  
+
+    const user = session?.user;
+    if (!user){
+      return;
+    }
+    console.log(user);
+
+    //see if a profile exists for the user
+    const {data: profiles, error: fetchError} = await supabase.from("profiles").select("id").eq("id", user.id);
+    if (fetchError){
+      console.error(fetchError);
+    }
+    if (profiles.length > 0){
+      alert("You already have a profile associated with this account")
+      navigate("/");
+    }
+  } ;
+
+  //on mount, if user has a profile, redirect
+  useEffect (() =>{
+    checkProfile();
+  }, [navigate]);
+
   const handleSubmit = async (e) => {
+
     e.preventDefault();
     setIsSubmitting(true);
     setError("");
@@ -21,6 +55,8 @@ const CreateProfile = () => {
     } = await supabase.auth.getSession();
     if (sessionError) throw sessionError;
     const user = session.user;
+
+    
 
     try {
       const { error: supabaseError } = await supabase.from("profiles").insert([
