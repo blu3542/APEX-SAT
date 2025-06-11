@@ -7,20 +7,22 @@ import FillBlank from "./FillBlank";
 
 interface DigitalSATQuestionProps {
   question: Question;
+  question_display_number: number;
   // Function passed should store the submitted answer to database
-  onAnswerSubmit?: (questionId: number, answerId: string) => void;
+  onAnswerSelect?: (questionId: number, answerId: number) => void;
   // Function passed should store the marked question to database
   onMarkForReview?: (questionId: number, isMarked: boolean) => void;
 }
 
 const DigitalSATQuestion: React.FC<DigitalSATQuestionProps> = ({
   question,
-  onAnswerSubmit,
+  question_display_number,
+  onAnswerSelect,
   onMarkForReview,
 }) => {
   // define props we are passing in
   const [isMarkedForReview, setIsMarkedForReview] = useState(false);
-  const [selectedOption, setSelectedOption] = useState<string | null>(null);
+  const [selectedOption, setSelectedOption] = useState<number | null>(null);
 
   const handleToggleMarkForReview = () => {
     const newMarkedState = !isMarkedForReview;
@@ -28,16 +30,16 @@ const DigitalSATQuestion: React.FC<DigitalSATQuestionProps> = ({
     onMarkForReview?.(question.id, newMarkedState);
   };
 
-  const handleSelectOption = (id: string) => {
+  const handleSelectOption = (id: number) => {
     setSelectedOption(id);
-    onAnswerSubmit?.(question.id, id);
+    onAnswerSelect?.(question.id, id);
   };
 
   return (
     <div className=" bg-white flex items-center justify-center h-screen">
       <main className="px-20 py-8">
         <QuestionHeader
-          questionNumber={question.id}
+          questionNumber={question_display_number}
           isMarkedForReview={isMarkedForReview}
           onToggleMarkForReview={handleToggleMarkForReview}
         />
@@ -54,7 +56,7 @@ const DigitalSATQuestion: React.FC<DigitalSATQuestionProps> = ({
           ) : (
             <FillBlank
               questionId={question.id}
-              onAnswerSubmit={(qId, ans) => onAnswerSubmit?.(qId, ans)}
+              onAnswerSelect={(qId, ans) => onAnswerSelect?.(qId, ans)}
             />
           )}
         </div>

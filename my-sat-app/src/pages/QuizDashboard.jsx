@@ -7,6 +7,7 @@ import { useNavigate } from 'react-router-dom';
 //query the number of practice tests in QuestionSets in Supabase - Run Once at mount
 const QuizDashboard = () => {
     const navigate = useNavigate();
+    const [userAccomodation, setUserAccomodation] = useState(1);
 
     //helper function to check if user has a profile already
       const checkProfile = async () =>{
@@ -23,14 +24,21 @@ const QuizDashboard = () => {
         
     
         //see if a profile exists for the user
-        const {data: profiles, error: fetchError} = await supabase.from("profiles").select("id").eq("id", user.id);
+        const {data: profile, error: fetchError} = await supabase.from("profiles").select("*").eq("id", user.id).single();
         if (fetchError){
           console.error(fetchError);
         }
-        if (profiles.length == 0){
+        if (profile.length == 0){
           alert("You do not have a profile at Apex SAT")
           navigate("/profile");
+          return;
         }
+
+        //if the profile exists, update their accomadation 
+        console.log("user profile: ", profile);
+        setUserAccomodation(profile.accomodation);
+        
+
       } ;
 
 
@@ -51,6 +59,8 @@ const QuizDashboard = () => {
         .like("title", `${prefix}_Module_%`)
         .order("id", { ascending: true });
 
+        //console.log(data);
+
       if (error) {
         console.error("Error loading modules:", error);
         return [];
@@ -63,7 +73,7 @@ const QuizDashboard = () => {
         return {
           id: row.id,
           moduleNumber: parseInt(num, 10),            // 1 or 2
-          difficulty: diff.toLowerCase(),              // "easy", "medium", or "hard"
+          difficulty: diff,              // "Easy", "Medium", or "Hard"
           timeLimit: row.time_limit
         };
       });
@@ -71,13 +81,14 @@ const QuizDashboard = () => {
 
     // Event handler to start the correct module (Module 1 – Medium by default)
     const handleStartClick = async (testNumber, section, minutes) => {
+      console.log("Starting section with time limit: ", minutes);
       try {
         // 1) Load all modules for that section
         const modules = await loadSubjectModules(testNumber, section);
-
+        console.log("modules: ", modules)
         // 2) Pick Module 1 – Medium
         const firstMod = modules.find(
-          m => m.moduleNumber === 1 && m.difficulty === "medium"
+          m => m.moduleNumber === 1 && m.difficulty === "Medium"
         );
         if (!firstMod) {
           console.error("Module 1 Medium not found for", section);
@@ -110,12 +121,12 @@ const QuizDashboard = () => {
         setSelectedAdaptiveQuestionSet({
           id: firstMod.id,
           title: `${section} Module 1 Medium`,
-          timeLimit: firstMod.timeLimit,
+          time_limit: minutes,
           questions: questions || [],
           testNumber,
           section,
           moduleNumber: 1,
-          difficulty: "medium"
+          difficulty: "Medium"
         });
       } catch (err) {
         console.error("Error starting module:", err);
@@ -156,7 +167,7 @@ const QuizDashboard = () => {
     //generate the test copmonents for each test that we will render. Note: Happens before return statement as return should be HTML only, no JS logic
       let testComponents = [];
       for (let i = 0; i < numTests; i++){
-        testComponents.push(<TestModule key={i} testNumber={i + 1} onStartClick={handleStartClick}/>)
+        testComponents.push(<TestModule key={i} testNumber={i + 1} onStartClick={handleStartClick} userAccomodation={userAccomodation}/>)
       };
     
   return (
@@ -185,7 +196,8 @@ const QuizDashboard = () => {
 
 
 // Reusable TestModule component
-const TestModule = ({ testNumber, onStartClick }) => (
+const TestModule = ({ testNumber, onStartClick, userAccomodation }) => (
+
     <div className="border border-gray-200 rounded overflow-hidden my-4">
       <h3 className="text-lg font-semibold p-4 text-black">Test {testNumber}</h3>
   
@@ -195,7 +207,7 @@ const TestModule = ({ testNumber, onStartClick }) => (
           <span className="font-medium text-gray-800">Reading and Writing</span>
         </div>
         <div className="flex space-x-6 text-teal-600">
-          <Button onClick={() => onStartClick(testNumber, "Reading and Writing", 35)}>
+          <Button onClick={() => onStartClick(testNumber, "Reading and Writing", 32 * userAccomodation)}>
             <div className="flex items-center space-x-1">
               <span>→</span>
               <span>Start</span>
@@ -209,7 +221,7 @@ const TestModule = ({ testNumber, onStartClick }) => (
         <div className="flex items-center space-x-4">
           <span className="font-medium text-gray-800">Math</span>
         </div>
-          <Button onClick={() => onStartClick(testNumber, "Math", 32)}>
+          <Button onClick={() => onStartClick(testNumber, "Math", 35 * userAccomodation)}>
             <div className="flex items-center space-x-1">
               <span>→</span>
               <span>Start</span>

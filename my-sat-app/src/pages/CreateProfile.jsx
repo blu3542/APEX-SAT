@@ -9,9 +9,11 @@ const CreateProfile = () => {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [position, setPosition] = useState("student");
+  const [userAccomodation, setUserAccomodation] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
+
 
   //helper function to check if user has a profile already
   const checkProfile = async () =>{
@@ -65,6 +67,7 @@ const CreateProfile = () => {
           display_name: `${firstName} ${lastName}`,
           position,
           email: user.email,
+          accomodation: userAccomodation,
         },
       ]);
 
@@ -79,6 +82,7 @@ const CreateProfile = () => {
       setError("Failed to create profile. Please try again.");
     } finally {
       setIsSubmitting(false);
+      navigate("/")
     }
   };
 
@@ -146,6 +150,23 @@ const CreateProfile = () => {
                 <option value="student">Student</option>
                 <option value="tutor">Tutor</option>
               </select>
+            </div>
+            <div>
+              <label htmlFor="accomodation" className="block text-sm font-medium text-gray-700"> Testing Accomodation
+
+              <select
+                id="accomodation"
+                name="accomodation"
+                value={userAccomodation}
+                onChange={(e) => setUserAccomodation(Number(e.target.value))}
+                className="mt-1 block w-full pl-3 pr-10 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-600 focus:border-blue-600 sm:text-sm"
+              >
+                <option value = "1" >1x</option>
+                <option value = "1.5">1.5x</option>
+                <option value = "2">2x</option>
+                
+              </select>
+              </label>
             </div>
           </div>
 

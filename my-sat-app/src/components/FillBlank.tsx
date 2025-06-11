@@ -3,12 +3,12 @@ import React, { useState } from "react";
 
 interface FillBlankProps {
   questionId: number;
-  onAnswerSubmit: (questionId: number, answer: string) => void;
+  onAnswerSelect: (questionId: number, answer: number) => void;
 }
 
 const FillBlank: React.FC<FillBlankProps> = ({
   questionId,
-  onAnswerSubmit,
+  onAnswerSelect,
 }) => {
   const [userInput, setUserInput] = useState<string>("");
 
@@ -21,13 +21,13 @@ const FillBlank: React.FC<FillBlankProps> = ({
     const trimmed = userInput.trim();
 
     // 2) Call parent callback to store in student_answers
-    onAnswerSubmit(questionId, trimmed);
+    onAnswerSelect(questionId, Number(trimmed));
   };
 
   // when the user input loses focus (clicked away from) we do our onAnswerSubmit functioanlity -registering it in testPage local state
   const handleBlur = () => {
     const trimmed = userInput.trim();
-    onAnswerSubmit(questionId, trimmed);
+    onAnswerSelect(questionId, Number(trimmed));
   };
 
   return (

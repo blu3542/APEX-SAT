@@ -7,7 +7,7 @@ interface QuestionContentProps {
 
 const QuestionContent: React.FC<QuestionContentProps> = ({ text, image }) => {
   return (
-    <div className="mb-8">
+    <div className="whitespace-pre-line mb-8">
       {image && (
         <div className="flex justify-center mb-6">
           <img
@@ -17,7 +17,7 @@ const QuestionContent: React.FC<QuestionContentProps> = ({ text, image }) => {
           />
         </div>
       )}
-      <p className="text-lg font-medium">{text}</p>
+      <p className="whitespace-pre-line text-lg font-medium">{text}</p>
     </div>
   );
 };

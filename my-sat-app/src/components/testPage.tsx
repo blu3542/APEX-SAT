@@ -4,26 +4,29 @@ import DigitalSATQuestion from "./DigitalSATQuestion";
 import { supabase } from "./supabase";
 import { Button } from "./Button";
 import { Question } from "../types/question_ds";
+import Timer from "./Timer";
 
 interface TestPageProps {
   questions: AdaptiveQuestionSet;
 }
 
 const TestPage: React.FC<TestPageProps> = ({ questions }) => {
+  //navigation guards
+
   //destructuring the questions prop
   const {
     moduleNumber: initialModule,
     difficulty: initialDifficulty,
     id: initialSetId,
     title: initialTitle,
-    timeLimit: initialTimeLimit,
+    time_limit: initialTimeLimit,
     questions: initialQuestions,
     testNumber,
     section,
   } = questions;
   const [attemptId, setAttemptId] = useState<number | null>(null);
   const [title, setTitle] = useState<string>(initialTitle);
-  const [timeLimit, setTimeLimit] = useState<number | null>(initialTimeLimit);
+  const [time_limit, setTimeLimit] = useState<number>(initialTimeLimit);
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const [isFinished, setIsFinished] = useState<boolean>(false);
   const [score, setScore] = useState<number>(0);
@@ -39,11 +42,24 @@ const TestPage: React.FC<TestPageProps> = ({ questions }) => {
   const [difficultyState, setDifficulty] = useState(initialDifficulty);
   const [currentSetId, setcurrentSetId] = useState(initialSetId);
 
-  // A ref to remember if we've already inserted for this question set
-  const didStartAttemptRef = useRef(false);
+  // 1) Hard‐unload guard: browser tab close / refresh / full URL change
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (!isFinished) {
+        e.preventDefault();
+        e.returnValue = ""; // required for Chrome
+      }
+    };
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, [isFinished]);
 
   // state setters based on when currentSetId changes
   useEffect(() => {
+    console.log("length of question list", questionList.length);
+    console.log("current index is: ", currentIndex);
     setCurrentIndex(0);
     // Reset the “did start” flag whenever the question set changes:
     setIsFinished(false);
@@ -98,7 +114,7 @@ const TestPage: React.FC<TestPageProps> = ({ questions }) => {
     }
   };
 
-  const handleAnswerSubmit = async (
+  const handleAnswerSelect = async (
     questionId: number,
     answer: string | number
   ) => {
@@ -126,11 +142,11 @@ const TestPage: React.FC<TestPageProps> = ({ questions }) => {
         },
       }));
     }
-
-    handleNextQuestion();
   };
 
   const finishAttempt = async () => {
+    if (isFinished) return;
+    setIsFinished(true);
     if (!attemptId) return;
 
     // 1) Build an array of answer objects for bulk insert
@@ -258,21 +274,6 @@ const TestPage: React.FC<TestPageProps> = ({ questions }) => {
     }
   };
 
-  // If the quiz is finished, show a result message
-  if (isFinished) {
-    return (
-      <div className="p-6">
-        <h2 className="text-2xl font-semibold">Test Complete!</h2>
-        <p className="mt-4">
-          You got {score} out of {questionList.length} correct.
-        </p>
-        <p className="mt-2 italic text-gray-600">
-          Your results have been sent to your tutor.
-        </p>
-      </div>
-    );
-  }
-
   // Otherwise, show the current question as before
   if (!currentQuestion) {
     return <p>Loading question…</p>;
@@ -281,36 +282,57 @@ const TestPage: React.FC<TestPageProps> = ({ questions }) => {
   // console.log("Our current question: ", currentQuestion);
   // console.log("here are our options: ", currentQuestion.Options);
 
-  return (
-    <div className="p-6">
-      <h1>{title}</h1>
-      <p>Time limit: {timeLimit} minutes</p>
-      <div className="flex justify-between w-full">
-        <Button
-          className="text-white w-[200px]"
-          onClick={handlePreviousQuestion}
-          disabled={currentIndex == 0}
-        >
-          Previous Question
-        </Button>
+  if (!isFinished) {
+    return (
+      <div className="p-6">
+        <h1>{title}</h1>
+        {/* show a countdown clock */}
 
-        <Button className="text-white w-[200px]" onClick={finishAttempt}>
-          Submit Answers
-        </Button>
+        <Timer initialMinutes={time_limit} onExpire={finishAttempt} />
 
-        <Button
-          className="text-white w-[200px]"
-          onClick={handleNextQuestion}
-          disabled={currentIndex >= questionList.length - 1}
-        >
-          Next Question
-        </Button>
+        <div className="flex justify-between w-full">
+          <Button
+            className="text-white w-[200px]"
+            onClick={handlePreviousQuestion}
+            disabled={currentIndex === 0}
+          >
+            Previous Question
+          </Button>
+
+          <Button className="text-white w-[200px]" onClick={finishAttempt}>
+            Submit Answers
+          </Button>
+
+          <Button
+            className="text-white w-[200px]"
+            onClick={handleNextQuestion}
+            disabled={currentIndex >= questionList.length - 1}
+          >
+            Next Question
+          </Button>
+        </div>
+
+        <DigitalSATQuestion
+          question={currentQuestion}
+          onAnswerSelect={handleAnswerSelect}
+          question_display_number={currentIndex + 1}
+        />
       </div>
+    );
+  }
 
-      <DigitalSATQuestion
-        question={currentQuestion}
-        onAnswerSubmit={handleAnswerSubmit}
-      />
+  // If the question set is finished, show a loading message or final message
+  return moduleNum === 1 ? (
+    <div className="p-6">
+      <h2 className="text-2xl font-semibold">Module Complete!</h2>
+      <p className="mt-2 italic text-gray-600">Loading next Module</p>
+    </div>
+  ) : (
+    <div className="p-6">
+      <h2 className="text-2xl font-semibold">Test Complete!</h2>
+      <p className="mt-2 italic text-gray-600">
+        Click Test Results for your score report
+      </p>
     </div>
   );
 };
