@@ -12,25 +12,25 @@ const QuestionHeader: React.FC<QuestionHeaderProps> = ({
   onToggleMarkForReview,
 }) => {
   return (
-    <div className="flex items-center justify-between mb-4">
-      <div className="flex items-center">
-        <div className="flex items-center justify-center w-8 h-8 bg-black text-white font-medium">
+    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 pb-4 border-b border-gray-200">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+        <div className="flex items-center justify-center w-10 h-10 bg-black text-white font-semibold rounded-md text-lg">
           {questionNumber}
         </div>
-        <div className="flex items-center ml-4">
+        <div className="flex items-center">
           <input
             type="checkbox"
             id="markForReview"
-            className="mr-2 h-4 w-4"
+            className="mr-3 h-4 w-4 rounded border-gray-300 text-black focus:ring-black focus:ring-2"
             checked={isMarkedForReview}
             onChange={onToggleMarkForReview}
           />
           <label
             htmlFor="markForReview"
-            className="flex items-center text-gray-600"
+            className="flex items-center text-gray-700 font-medium cursor-pointer select-none"
           >
             <svg
-              className="h-5 w-5 mr-1"
+              className="h-5 w-5 mr-2"
               viewBox="0 0 24 24"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
@@ -43,11 +43,12 @@ const QuestionHeader: React.FC<QuestionHeaderProps> = ({
                 strokeLinejoin="round"
               />
             </svg>
-            Mark For Review
+            <span className="hidden sm:inline">Mark For Review</span>
+            <span className="sm:hidden">Mark</span>
           </label>
         </div>
       </div>
-      <button className="p-2 text-gray-500 hover:text-gray-700">
+      <button className="self-start sm:self-auto p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-md transition-colors">
         <svg
           className="h-5 w-5"
           viewBox="0 0 24 24"

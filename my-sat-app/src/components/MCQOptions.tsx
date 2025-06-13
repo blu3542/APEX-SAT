@@ -7,13 +7,13 @@ interface MCQOptionsProps {
   onSelectOption: (id: number) => void;
 }
 
-const AnswerOptions: React.FC<MCQOptionsProps> = ({
+const MCQOptions: React.FC<MCQOptionsProps> = ({
   options = [],
   selectedOption,
   onSelectOption,
 }) => {
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       {options.map((option) => {
         const isSelected = selectedOption === option.id;
 
@@ -22,29 +22,35 @@ const AnswerOptions: React.FC<MCQOptionsProps> = ({
             key={option.id}
             onClick={() => onSelectOption(option.id)}
             className={`
-              flex items-center rounded-md p-4 cursor-pointer
-              ${isSelected ? "border-2 border-black" : "border border-gray-300"}
+              flex items-start rounded-lg p-4 cursor-pointer transition-all duration-200
+              hover:shadow-md hover:bg-gray-50
+              ${
+                isSelected
+                  ? "border-2 border-black bg-gray-50 shadow-md"
+                  : "border border-gray-300 bg-white"
+              }
             `}
           >
             <div
               className={`
                 w-8 h-8 flex items-center justify-center rounded-full 
-                border ${isSelected ? "border-black" : "border-gray-400"} 
-                mr-4
+                border-2 mr-4 flex-shrink-0 transition-colors duration-200
+                ${
+                  isSelected
+                    ? "border-black bg-black text-white"
+                    : "border-gray-400 bg-white text-gray-600"
+                }
               `}
             >
-              {/* always show the letter; bold/black when selected */}
-              <span
-                className={`${
-                  isSelected ? "font-bold text-black" : "text-gray-600"
-                }`}
-              >
-                {option.letter}
-              </span>
+              <span className="font-semibold text-sm">{option.letter}</span>
             </div>
 
-            {/* bold the option text when selected */}
-            <span className={`text-lg ${isSelected ? "font-bold" : ""}`}>
+            <span
+              className={`
+                text-base sm:text-lg leading-relaxed flex-1
+                ${isSelected ? "font-semibold text-black" : "text-gray-800"}
+              `}
+            >
               {option.text}
             </span>
           </div>
@@ -54,4 +60,4 @@ const AnswerOptions: React.FC<MCQOptionsProps> = ({
   );
 };
 
-export default AnswerOptions;
+export default MCQOptions;
