@@ -1,42 +1,38 @@
-import React, { useState, useEffect } from "react";
+// src/components/DigitalSATQuestion.tsx
+import React, { useState } from "react";
 import QuestionHeader from "./QuestionHeader";
 import QuestionContent from "./QuestionContent";
 import MCQOptions from "./MCQOptions";
-import { Question } from "../types/question_ds";
 import FillBlank from "./FillBlank";
+import { Question } from "../types/question_ds";
 
 interface DigitalSATQuestionProps {
   question: Question;
   question_display_number: number;
-  // Function passed should store the submitted answer to database
-  onAnswerSelect?: (questionId: number, answerId: number) => void;
-  // Function passed should store the marked question to database
+  /** handles both MCQ and fill-in answers now */
+  onAnswerSelect?: (questionId: number, answer: number | string) => void;
   onMarkForReview?: (questionId: number, isMarked: boolean) => void;
+  /** the parent’s current answer for this question */
+  answer?: number | string | null;
 }
 
 const DigitalSATQuestion: React.FC<DigitalSATQuestionProps> = ({
   question,
   question_display_number,
+  answer,
   onAnswerSelect,
   onMarkForReview,
 }) => {
-  // define props we are passing in
   const [isMarkedForReview, setIsMarkedForReview] = useState(false);
-  const [selectedOption, setSelectedOption] = useState<number | null>(null);
 
   const handleToggleMarkForReview = () => {
-    const newMarkedState = !isMarkedForReview;
-    setIsMarkedForReview(newMarkedState);
-    onMarkForReview?.(question.id, newMarkedState);
-  };
-
-  const handleSelectOption = (id: number) => {
-    setSelectedOption(id);
-    onAnswerSelect?.(question.id, id);
+    const newMarked = !isMarkedForReview;
+    setIsMarkedForReview(newMarked);
+    onMarkForReview?.(question.id, newMarked);
   };
 
   return (
-    <div className=" bg-white flex items-center justify-center h-screen">
+    <div className="bg-white flex items-center justify-center h-screen">
       <main className="px-20 py-8">
         <QuestionHeader
           questionNumber={question_display_number}
@@ -47,16 +43,19 @@ const DigitalSATQuestion: React.FC<DigitalSATQuestionProps> = ({
         <QuestionContent text={question.text} image={question.image_url} />
 
         <div>
-          {question.type == "mcq" ? (
+          {question.type === "mcq" ? (
             <MCQOptions
               options={question.Options}
-              selectedOption={selectedOption}
-              onSelectOption={handleSelectOption}
+              /** cast answer to number (or null) */
+              selectedOption={typeof answer === "number" ? answer : null}
+              onSelectOption={(id) => onAnswerSelect?.(question.id, id)}
             />
           ) : (
             <FillBlank
               questionId={question.id}
-              onAnswerSelect={(qId, ans) => onAnswerSelect?.(qId, ans)}
+              /** cast answer to string */
+              value={typeof answer === "string" ? answer : ""}
+              onAnswerChange={(qId, text) => onAnswerSelect?.(qId, text)}
             />
           )}
         </div>

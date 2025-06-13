@@ -35,7 +35,7 @@ const QuizDashboard = () => {
         }
 
         //if the profile exists, update their accomadation 
-        console.log("user profile: ", profile);
+        // console.log("user profile: ", profile);
         setUserAccomodation(profile.accomodation);
         
 
@@ -155,7 +155,7 @@ const QuizDashboard = () => {
       if (data) {
         const uniqueTestIds = new Set(data.map(row => row.test_id));
         setNumTests(uniqueTestIds.size);
-        console.log("number of tests: ",uniqueTestIds.size);
+        // console.log("number of tests: ",uniqueTestIds.size);
       }
       
     };

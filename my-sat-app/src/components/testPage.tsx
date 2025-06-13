@@ -58,8 +58,8 @@ const TestPage: React.FC<TestPageProps> = ({ questions }) => {
 
   // state setters based on when currentSetId changes
   useEffect(() => {
-    console.log("length of question list", questionList.length);
-    console.log("current index is: ", currentIndex);
+    // console.log("length of question list", questionList.length);
+    // console.log("current index is: ", currentIndex);
     setCurrentIndex(0);
     // Reset the “did start” flag whenever the question set changes:
     setIsFinished(false);
@@ -76,7 +76,7 @@ const TestPage: React.FC<TestPageProps> = ({ questions }) => {
       }
       const userId = session.user.id;
 
-      console.log("Starting test ", testNumber, " for user: ", userId);
+      // console.log("Starting test ", testNumber, " for user: ", userId);
 
       const { data, error } = await supabase
         .from("attempts")
@@ -315,6 +315,11 @@ const TestPage: React.FC<TestPageProps> = ({ questions }) => {
         <DigitalSATQuestion
           question={currentQuestion}
           onAnswerSelect={handleAnswerSelect}
+          answer={
+            currentQuestion.type === "mcq"
+              ? userAnswers[currentQuestion.id]?.selectedOptionId ?? null
+              : userAnswers[currentQuestion.id]?.textAnswer ?? ""
+          }
           question_display_number={currentIndex + 1}
         />
       </div>
