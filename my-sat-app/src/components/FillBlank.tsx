@@ -23,7 +23,7 @@ const FillBlank: React.FC<FillBlankProps> = ({
         // e: ChangeEvent<HTMLInputElement>
         onAnswerChange(questionId, e.target.value);
       }}
-      className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-teal-500"
+      className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-black"
       placeholder="Type your answer..."
     />
   </div>
