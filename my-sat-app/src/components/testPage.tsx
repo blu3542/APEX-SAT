@@ -210,17 +210,20 @@ const TestPage: React.FC<TestPageProps> = ({ questions }) => {
     const correctCount = answersToInsert.filter((a) => a.is_correct).length;
 
     // 4) Update the attempts row with completed_at and score
-    const { error: updateError } = await supabase
+    const { data, error: updateError } = await supabase
       .from("attempts")
       .update({
         completed_at: new Date(),
         score: correctCount,
       })
-      .eq("id", attemptId);
+      .eq("id", attemptId)
+      .select("id, score, completed_at")
+      .single();
 
     if (updateError) {
       console.error("Error updating attempt:", updateError);
     }
+    console.log("Updated attempt with payload: ", data);
 
     //Part 2: Transition Into Next Question Set (adaptive testing)
     if (moduleNum === 1) {
