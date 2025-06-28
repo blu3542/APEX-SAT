@@ -13,12 +13,13 @@ import { Button } from "./components/Button.js";
 import { Layout } from "./components/Layout.js";
 import ResultDashboard from "./pages/ResultDashboard";
 import SolutionPage from "./pages/SolutionPage"
-import ResultPage from "./pages/ResultPage"
+import ResultPage from "./pages/ResultPage";
+import TutorDashboard from "./pages/TutorDashboard.tsx";
 
 
 function App() {
   const [session, setSession] = useState(null);
-  const [Question, setQuestion] = useState(null);  // note capital Q to match your destructuring
+  const [Question, setQuestion] = useState(null);  
   const [loadingQuestion, setLoadingQuestion] = useState(false);
 
   // — auth setup
@@ -108,6 +109,8 @@ function App() {
           <Route path="/results" element={<ResultDashboard/>}/>
           <Route path="/results/:testNumber/session/:sessionIdx/solutions" element={<SolutionPage />}/>
           <Route path="/results/:testNumber" element={<ResultPage />} />
+          <Route path="/Tutors" element={<TutorDashboard/>}/>
+          
         </Routes>
        </Layout>
     </BrowserRouter>
