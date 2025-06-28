@@ -74,7 +74,7 @@ const QuizDashboard = () => {
         console.log("Verification Status: ", data.verified);
         
         if (!data.verified) {
-          alert("User is not Verified. Contact Apex Academy Admin for verification to access questions");
+          alert("User is not Verified. Contact Apex Academys Admin for verification to access questions");
           navigate("/");
         }
       }
