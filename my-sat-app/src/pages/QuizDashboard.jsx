@@ -26,10 +26,12 @@ const QuizDashboard = () => {
         //see if a profile exists for the user
         const {data: profile, error: fetchError} = await supabase.from("profiles").select("*").eq("id", user.id).single();
         if (fetchError){
-          console.error(fetchError);
+          console.error("Profile Fetch Error: ", fetchError);
         }
-        if (profile.length == 0){
-          alert("You do not have a profile at Apex SAT")
+
+        console.log("Profile Response: ", profile);
+        if (profile == null){
+          alert("You do not have a profile at Apex SAT");
           navigate("/profile");
           return;
         }
@@ -40,6 +42,43 @@ const QuizDashboard = () => {
         
 
       } ;
+
+      //helper function to check if user is verified or not
+      
+      const checkVerified = async () =>{
+        const {
+          data: { user },
+          error
+        } = await supabase.auth.getUser();
+
+        if (error) {
+          console.error("Error fetching user:", error);
+        } 
+
+        const userID = user.id;
+        console.log("User ID:", userID);
+        
+        // fetch the verification status of the current user
+        const { data, error: profileError } = await supabase
+          .from("profiles")
+          .select("verified")
+          .eq("id", userID)
+          .single();
+        
+        
+        if (profileError){
+          console.log("Profile Error Occurred: ", profileError);
+        }
+
+       
+        console.log("Verification Status: ", data.verified);
+        
+        if (!data.verified) {
+          alert("User is not Verified. Contact Apex Academy Admin for verification to access questions");
+          navigate("/");
+        }
+      }
+
 
 
 
@@ -143,6 +182,7 @@ const QuizDashboard = () => {
 
     useEffect(() => {
       checkProfile();
+      checkVerified();
       const fetchData = async () => {
       const { data, error } = await supabase
         .from("QuestionSet")
