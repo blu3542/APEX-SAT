@@ -18,8 +18,13 @@ interface TutorSolutionViewProps {
   onBack: () => void;
 }
 
-export default function TutorSolutionView({ session, onBack }: TutorSolutionViewProps) {
-  const { questionSets, studentAnswers, loading, error } = useSolutionData(session.attempts);
+export default function TutorSolutionView({
+  session,
+  onBack,
+}: TutorSolutionViewProps) {
+  const { questionSets, studentAnswers, loading, error } = useSolutionData(
+    session.attempts
+  );
 
   const moduleNames = [
     "Reading Module 1 (Medium)",
@@ -101,7 +106,7 @@ export default function TutorSolutionView({ session, onBack }: TutorSolutionView
       </div>
 
       <h2 className="mt-4 text-xl">{moduleName}</h2>
-      
+
       <div className="flex items-center justify-between mt-8">
         <Button
           onClick={() => setCurrentIndex((i) => i - 1)}
@@ -114,16 +119,16 @@ export default function TutorSolutionView({ session, onBack }: TutorSolutionView
           Question {currentIndex + 1} of {slideCount}
         </span>
 
-        <Button
-          onClick={() => setCurrentIndex((i) => i + 1)}
-          disabled={isLast}
-        >
+        <Button onClick={() => setCurrentIndex((i) => i + 1)} disabled={isLast}>
           Next →
         </Button>
       </div>
 
       <div className="mt-6">
-        <DigitalSATQuestion question={question} />
+        <DigitalSATQuestion
+          question={question}
+          question_display_number={question.id}
+        />
 
         <div className="mt-4 space-y-1 text-sm">
           <p>
@@ -134,7 +139,11 @@ export default function TutorSolutionView({ session, onBack }: TutorSolutionView
           </p>
           <p>
             <strong>Result:</strong>{" "}
-            <span className={yourText === correctText ? "text-green-600" : "text-red-600"}>
+            <span
+              className={
+                yourText === correctText ? "text-green-600" : "text-red-600"
+              }
+            >
               {yourText === correctText ? "Correct" : "Incorrect"}
             </span>
           </p>

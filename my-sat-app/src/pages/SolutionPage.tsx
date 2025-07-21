@@ -120,7 +120,10 @@ export default function SolutionPage() {
 
       <div className="mt-6">
         {/* read-only reviewMode; pass in user answers */}
-        <DigitalSATQuestion question={question} />
+        <DigitalSATQuestion
+          question={question}
+          question_display_number={question.id}
+        />
 
         <div className="mt-4 space-y-1 text-sm">
           <p>

@@ -33,7 +33,8 @@ export function useSolutionData(attempts: Attempt[]) {
               )
             )
           `)
-          .in('id', attempts.map(a => a.question_set_id));
+          .in('id', attempts.map(a => a.question_set_id))
+          .order('id', { ascending: true, referencedTable: 'Question' });
         if (qsError) throw qsError;
         setQuestionSets(qsData || []);
 
